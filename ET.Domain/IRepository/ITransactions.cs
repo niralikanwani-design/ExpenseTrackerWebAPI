@@ -10,7 +10,7 @@ namespace ET.Domain.IRepository
     public interface ITransactions
     {
         Task<bool> AddTransaction(TransactionModel transactionModel);
-        Task<List<TransactionModel>> GetTransaction();
+        Task<List<TransactionModel>> GetTransaction(TransactionFilterModel transactionFilterModel);
         Task<bool> UpdateTransaction(UpdateTransactionModel transactionModel);
         Task<int> DeleteTransaction(int id);
     }

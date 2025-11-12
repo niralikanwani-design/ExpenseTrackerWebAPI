@@ -41,9 +41,27 @@ namespace ET.Infrastructure.Repository
             }
         }
 
-        public async Task<List<TransactionModel>> GetTransaction()
+        public async Task<List<TransactionModel>> GetTransaction(TransactionFilterModel transactionFilterModel)
         {
-            List<TransactionModel> transactions = await _dbcontext.Transactions.Select(t => new TransactionModel
+            var query = _dbcontext.Transactions.AsQueryable();
+
+            if (!string.IsNullOrEmpty(transactionFilterModel.Type))
+                query = query.Where(t => t.Type == transactionFilterModel.Type);
+
+            if (transactionFilterModel.StartDate.HasValue)
+                query = query.Where(t => t.TransactionDate >= transactionFilterModel.StartDate.Value);
+
+            if (transactionFilterModel.EndDate.HasValue)
+                query = query.Where(t => t.TransactionDate <= transactionFilterModel.EndDate.Value);
+
+            var totalCount = await query.CountAsync();
+
+            int pageNumber = transactionFilterModel.PageNumber <= 0 ? 1 : transactionFilterModel.PageNumber;
+            int pageSize = transactionFilterModel.PageSize <= 0 ? 10 : transactionFilterModel.PageSize;
+
+            query = query.OrderBy(t => t.TransactionId).Skip((pageNumber - 1) * pageSize).Take(pageSize);
+
+            List<TransactionModel> transactions = await query.Select(t => new TransactionModel
             {
                 Amount = t.Amount,
                 CategoryId = t.CategoryId,

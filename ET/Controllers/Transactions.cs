@@ -16,10 +16,10 @@ namespace ET.WebAPI.Controllers
             _Itransactions = transactions;
         }
 
-        [HttpGet("GetTransaction")]
-        public async Task<IActionResult> GetTransaction()
+        [HttpPost("GetTransaction")]
+        public async Task<IActionResult> GetTransaction([FromBody]TransactionFilterModel transactionFilterModel)
         {
-            var result = await _Itransactions.GetTransaction();
+            var result = await _Itransactions.GetTransaction(transactionFilterModel);
             if (result == null || !result.Any())
                 return BadRequest("No transactions found");
             return Ok(result);
