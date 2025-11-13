@@ -2,11 +2,6 @@
 using ET.Domain.IRepository;
 using ET.Domain.Models;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ET.Infrastructure.Repository
 {
@@ -59,10 +54,38 @@ namespace ET.Infrastructure.Repository
             int pageNumber = transactionFilterModel.PageNumber <= 0 ? 1 : transactionFilterModel.PageNumber;
             int pageSize = transactionFilterModel.PageSize <= 0 ? 10 : transactionFilterModel.PageSize;
 
+            if (!string.IsNullOrEmpty(transactionFilterModel.SortbyColumn))
+            {
+                bool isAscending = string.Equals(transactionFilterModel.SortbyOrder, "asc", StringComparison.OrdinalIgnoreCase);
+
+                switch (transactionFilterModel.SortbyColumn.ToLower())
+                {
+                    case "date":
+                        query = isAscending ? query.OrderBy(t => t.TransactionDate) : query.OrderByDescending(t => t.TransactionDate);
+                        break;
+                    case "amount":
+                        query = isAscending ? query.OrderBy(t => t.Amount) : query.OrderByDescending(t => t.Amount);
+                        break;
+
+                    case "title":
+                        query = isAscending ? query.OrderBy(t => t.Description) : query.OrderByDescending(t => t.Description);
+                        break;
+
+                    default:
+                        query = query.OrderByDescending(t => t.TransactionId);
+                        break;
+                }
+            }
+            else
+            {
+                query = query.OrderByDescending(t => t.TransactionId);
+            }
+
             query = query.OrderBy(t => t.TransactionId).Skip((pageNumber - 1) * pageSize).Take(pageSize);
 
             List<TransactionModel> transactions = await query.Select(t => new TransactionModel
             {
+                TransactionId = t.TransactionId,
                 Amount = t.Amount,
                 CategoryId = t.CategoryId,
                 Description = t.Description,
