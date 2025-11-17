@@ -9,7 +9,7 @@ namespace ET.Domain.IRepository
 {
     public interface IAuthService
     {
-        Task<string> RegisterUser(AuthRegisterModel authRegisterModel);
-        Task<string> LoginUser(AuthLoginModel authLoginModel);
+        Task<AuthResponse> RegisterUser(AuthRegisterModel authRegisterModel);
+        Task<AuthResponse> LoginUser(AuthLoginModel authLoginModel);
     }
 }

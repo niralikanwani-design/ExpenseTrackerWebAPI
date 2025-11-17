@@ -1,44 +1,45 @@
 ﻿using ET.Domain.DTO;
 using ET.Domain.IRepository;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Runtime.CompilerServices;
 
-namespace ET.WebAPI.Controllers
+[Route("api/[controller]")]
+[ApiController]
+public class AuthController : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class AuthController : ControllerBase
+    private readonly IAuthService _authService;
+
+    public AuthController(IAuthService authService)
     {
-        private readonly IAuthService _IAuthService;
-        public AuthController(IAuthService IAuthService)
-        {
-            _IAuthService = IAuthService;
-        }
+        _authService = authService;
+    }
 
-        [HttpPost("RegisterUser")]
-        public async Task<ActionResult> RegisterUser(AuthRegisterModel authRegisterModel)
-        {
-            var result = await _IAuthService.RegisterUser(authRegisterModel);
-            if (result == null || !result.Any())
-                return BadRequest("Please enter valid data");
-            return Ok(new
-            {
-                Token = result,
-                Message = "User register successfull"
-            });
-        }
+    [HttpPost("RegisterUser")]
+    public async Task<IActionResult> RegisterUser(AuthRegisterModel model)
+    {
+        var result = await _authService.RegisterUser(model);
 
-        [HttpPost("LoginUser")]
-        public async Task<ActionResult> LoginUser(AuthLoginModel authLoginModel)
+        if(result.Message == "Email already registered")
+            return Ok(new { Message = result.Message, Islogin = false });
+
+        if (!result.Success)
+            return BadRequest(new { Message = result.Message, Islogin = false });
+
+        return Ok(new { Message = "User registered successfully", Islogin = true });
+    }
+
+    [HttpPost("LoginUser")]
+    public async Task<IActionResult> LoginUser(AuthLoginModel model)
+    {
+        var result = await _authService.LoginUser(model);
+
+        return !result.Success
+            ? Ok(new { Message = result.Message, Token = "", Success = false })
+            : (IActionResult)Ok(new
         {
-            var result = await _IAuthService.LoginUser(authLoginModel);
-            if (result == null || !result.Any())
-                return BadRequest("Please enter valid data");
-            return Ok(new
-            {
-                Token = result,
-                Message = "Login successfull"
-            });
-        }
+            Token = result.Token,
+            Success = true,
+            Message = "Login successful"
+        });
     }
 }

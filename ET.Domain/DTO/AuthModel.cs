@@ -26,5 +26,11 @@ namespace ET.Domain.DTO
         [MaxLength(100, ErrorMessage = "Password must be less than or equal to 100 characters.")]
         public string Password { get; set; } = null!;
     }
+    public class AuthResponse
+    {
+        public bool Success { get; set; }
+        public string Message { get; set; }
+        public string Token { get; set; }
+    }
 
 }
