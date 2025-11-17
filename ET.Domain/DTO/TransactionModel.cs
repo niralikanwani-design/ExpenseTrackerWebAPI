@@ -42,8 +42,8 @@ namespace ET.Domain.DTO
         public string Type { get; set; }
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
-        public string SortbyColumn { get; set; }
-        public string SortbyOrder { get; set; }
+        public string SortbyColumn { get; set; } = "date";
+        public string SortbyOrder { get; set; } = "desc";
     }
 
 }
