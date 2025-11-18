@@ -1,6 +1,7 @@
 ﻿using ET.Domain.DTO;
 using ET.Domain.IRepository;
 using ET.Domain.Models;
+using ET.Infrastructure.Context;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -11,10 +12,10 @@ using System.Text;
 
 public class AuthService : IAuthService
 {
-    private readonly ExpensTrackerContext _dbcontext;
+    private readonly ExpenseTrackerContext _dbcontext;
     private readonly IConfiguration _config;
 
-    public AuthService(ExpensTrackerContext dbcontext, IConfiguration config)
+    public AuthService(ExpenseTrackerContext dbcontext, IConfiguration config)
     {
         _dbcontext = dbcontext;
         _config = config;

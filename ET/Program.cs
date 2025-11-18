@@ -1,13 +1,13 @@
 
 using ET.Domain.IRepository;
-using ET.Domain.Models;
+using ET.Infrastructure.Context;
 using ET.Infrastructure.Repository;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
-namespace ET
+namespace ET.WebAPI
 {
     public class Program
     {
@@ -23,9 +23,9 @@ namespace ET
                     ValidateAudience = true,
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
-                    ValidIssuer = builder.Configuration["Jwt:Issuer"],
-                    ValidAudience = builder.Configuration["Jwt:Audience"],
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+                    ValidIssuer = builder.Configuration["Jwt:Issuer"] ?? throw new KeyNotFoundException("Issue"),
+                    ValidAudience = builder.Configuration["Jwt:Audience"] ?? throw new KeyNotFoundException("Audience"),
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? throw new KeyNotFoundException("IssuerSigningKey")))
                 };
             });
             // Add services to the container.
@@ -40,9 +40,9 @@ namespace ET
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
-            builder.Services.AddDbContext<ExpensTrackerContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-            builder.Services.AddScoped<ITransactions, Transactions>();
+            builder.Services.AddDbContext<ExpenseTrackerContext>(options =>
+            options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+            builder.Services.AddScoped<ITransactionsService, TransactionsService>();
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddAuthorization();
 

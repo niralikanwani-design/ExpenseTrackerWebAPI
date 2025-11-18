@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace ET.Domain.Models;
+﻿namespace ET.Domain.Models;
 
 public partial class Transaction
 {
@@ -16,6 +13,8 @@ public partial class Transaction
     public string Type { get; set; } = null!;
 
     public string? Description { get; set; }
+
+    public string? Title { get; set; }
 
     public DateTime TransactionDate { get; set; }
 
