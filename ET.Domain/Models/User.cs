@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace ET.Domain.Models;
+﻿namespace ET.Domain.Models;
 
 public partial class User
 {
