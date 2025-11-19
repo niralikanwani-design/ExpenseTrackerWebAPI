@@ -48,12 +48,15 @@ public class AuthService : IAuthService
 
         user.PasswordHash = passwordHasher.HashPassword(user, model.Password);
 
+        string token = GenerateJwtToken(user);
+
         await _dbcontext.Users.AddAsync(user);
         await _dbcontext.SaveChangesAsync();
 
         return new AuthResponse
         {
             Success = true,
+            Token = token,
             Message = "User registered successfully"
         };
     }
