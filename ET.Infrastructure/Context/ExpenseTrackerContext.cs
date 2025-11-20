@@ -1,4 +1,5 @@
-﻿using ET.Domain.Models;
+﻿using ET.Domain.DTO;
+using ET.Domain.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace ET.Infrastructure.Context;
@@ -96,7 +97,11 @@ public partial class ExpenseTrackerContext : DbContext
             entity.Property(e => e.FullName).HasMaxLength(100);
         });
 
+        modelBuilder.Entity<DashboardItem>().HasNoKey();
+        modelBuilder.Entity<CategoryExpenseItem>().HasNoKey();
+
         OnModelCreatingPartial(modelBuilder);
+
     }
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
