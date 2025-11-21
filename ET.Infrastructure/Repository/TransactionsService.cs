@@ -25,7 +25,6 @@ namespace ET.Infrastructure.Repository
                     TransactionDate = transactionModel.TransactionDate,
                     CreatedAt = transactionModel.CreatedAt,
                     Description = transactionModel.Description,
-                    Title = transactionModel.Title,
                     Type = transactionModel.Type,
                     UserId = 1
                 };
