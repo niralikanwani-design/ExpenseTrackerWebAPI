@@ -22,15 +22,22 @@
         public DateTime TransactionDate { get; set; }
     }
 
+    public class FilterColumns
+    {
+        public string Title { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public string CategoryId { get; set; } = string.Empty;
+    }
+
     public class TransactionFilterModel
     {
         public int PageNumber { get; set; } = 1;
         public int PageSize { get; set; } = 10;
-        public string Type { get; set; }
-        public DateTime? StartDate { get; set; }
-        public DateTime? EndDate { get; set; }
-        public string SortbyColumn { get; set; } = "date";
-        public string SortbyOrder { get; set; } = "desc";
+        public string? Type { get; set; }
+        public string? StartDate { get; set; }
+        public string? EndDate { get; set; }
+        public string? SortbyColumn { get; set; } = "date";
+        public string? SortbyOrder { get; set; } = "asc";
+        public FilterColumns Filters { get; set; } = new();
     }
-
 }
