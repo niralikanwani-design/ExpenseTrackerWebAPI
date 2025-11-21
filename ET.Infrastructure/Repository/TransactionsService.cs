@@ -41,18 +41,37 @@ namespace ET.Infrastructure.Repository
 
         public async Task<List<TransactionModel>> GetTransaction(TransactionFilterModel transactionFilterModel)
         {
+            DateTime startDate;
+            DateTime endDate;
+
             var query = _dbcontext.Transactions.AsQueryable();
 
             if (!string.IsNullOrEmpty(transactionFilterModel.Type))
                 query = query.Where(t => t.Type == transactionFilterModel.Type);
 
-            if (transactionFilterModel.StartDate.HasValue)
-                query = query.Where(t => t.TransactionDate >= transactionFilterModel.StartDate.Value);
+            if (!string.IsNullOrEmpty(transactionFilterModel.StartDate) && DateTime.TryParse(transactionFilterModel.StartDate, out startDate))
+                query = query.Where(t => t.TransactionDate >= startDate);
 
-            if (transactionFilterModel.EndDate.HasValue)
-                query = query.Where(t => t.TransactionDate <= transactionFilterModel.EndDate.Value);
+            if (!string.IsNullOrEmpty(transactionFilterModel.EndDate) && DateTime.TryParse(transactionFilterModel.EndDate, out endDate))
+                query = query.Where(t => t.TransactionDate <= endDate);
 
-            var totalCount = await query.CountAsync();
+            if (!string.IsNullOrWhiteSpace(transactionFilterModel.Filters.Title))
+            {
+                string titleFilter = transactionFilterModel.Filters.Title;
+                query = query.Where(t => t.Title != null && t.Title.Contains(titleFilter));
+            }
+
+            if (!string.IsNullOrWhiteSpace(transactionFilterModel.Filters.Description))
+            {
+                string descFilter = transactionFilterModel.Filters.Description;
+                query = query.Where(t => t.Description != null && t.Description.Contains(descFilter));
+            }
+
+            if (!string.IsNullOrWhiteSpace(transactionFilterModel.Filters.CategoryId))
+            {
+                string categoryFilter = transactionFilterModel.Filters.CategoryId;
+                query = query.Where(t => t.CategoryId.ToString().Contains(categoryFilter));
+            }
 
             int pageNumber = transactionFilterModel.PageNumber <= 0 ? 1 : transactionFilterModel.PageNumber;
             int pageSize = transactionFilterModel.PageSize <= 0 ? 10 : transactionFilterModel.PageSize;
@@ -61,23 +80,14 @@ namespace ET.Infrastructure.Repository
             {
                 bool isAscending = string.Equals(transactionFilterModel.SortbyOrder, "asc", StringComparison.OrdinalIgnoreCase);
 
-                switch (transactionFilterModel.SortbyColumn.ToLower())
+                query = transactionFilterModel.SortbyColumn.ToLower() switch
                 {
-                    case "date":
-                        query = isAscending ? query.OrderBy(t => t.TransactionDate) : query.OrderByDescending(t => t.TransactionDate);
-                        break;
-                    case "amount":
-                        query = isAscending ? query.OrderBy(t => t.Amount) : query.OrderByDescending(t => t.Amount);
-                        break;
-
-                    case "title":
-                        query = isAscending ? query.OrderBy(t => t.Description) : query.OrderByDescending(t => t.Description);
-                        break;
-
-                    default:
-                        query = query.OrderByDescending(t => t.TransactionId);
-                        break;
-                }
+                    "title" => isAscending ? query.OrderBy(t => t.Title) : query.OrderByDescending(t => t.Title),
+                    "description" => isAscending ? query.OrderBy(t => t.Description) : query.OrderByDescending(t => t.Description),
+                    "categoryId" => isAscending ? query.OrderBy(t => t.CategoryId) : query.OrderByDescending(t => t.CategoryId),
+                    "date" => isAscending ? query.OrderBy(t => t.TransactionDate) : query.OrderByDescending(t => t.TransactionDate),
+                    _ => query.OrderByDescending(t => t.TransactionDate),
+                };
             }
             else
             {
@@ -95,6 +105,7 @@ namespace ET.Infrastructure.Repository
                 CreatedAt = t.CreatedAt,
                 TransactionDate = t.TransactionDate,
                 Type = t.Type,
+                Title = t.Title
             }).AsNoTracking().ToListAsync();
             return transactions;
         }
