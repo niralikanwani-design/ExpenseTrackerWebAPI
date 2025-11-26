@@ -9,6 +9,6 @@ namespace ET.Domain.IRepository
 {
     public interface IDashboardService
     {
-        Task<DashboardModel> GetDashboardData(int userId, int month);
+        Task<DashboardModel> GetDashboardData(int userId, int month, string type);
     }
 }

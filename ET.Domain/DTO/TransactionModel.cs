@@ -40,4 +40,11 @@
         public string? SortbyOrder { get; set; } = "asc";
         public FilterColumns Filters { get; set; } = new();
     }
+
+    public class CategoryModel
+    {
+        public int CategoryId { get; set; }
+        public string CategoryName { get; set; } 
+    }
+
 }

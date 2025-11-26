@@ -148,5 +148,22 @@ namespace ET.Infrastructure.Repository
             }
         }
 
+        public async Task<List<CategoryModel>> GetIncomeCategory()
+        {
+            try
+            {
+                var category = await _dbcontext.Categories.Where(x => x.Type == "Income").Select(x => new CategoryModel{
+                 CategoryId = x.CategoryId,
+                 CategoryName = x.Name,
+                }).ToListAsync();
+
+                return category;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
     }
 }

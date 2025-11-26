@@ -13,10 +13,10 @@ namespace ET.WebAPI.Controllers
             _service = service;
         }
 
-        [HttpGet("GetDashboardData/{userId}/{month}")]
-        public async Task<IActionResult> GetDashboardData(int userId, int month)
+        [HttpGet("GetDashboardData/{userId}/{month}/{type}")]
+        public async Task<IActionResult> GetDashboardData(int userId, int month, string type)
         {
-            var result = await _service.GetDashboardData(userId, month);
+            var result = await _service.GetDashboardData(userId, month, type);
             return Ok(result);
         }
 
