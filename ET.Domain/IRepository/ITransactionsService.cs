@@ -8,5 +8,6 @@ namespace ET.Domain.IRepository
         Task<List<TransactionModel>> GetTransaction(TransactionFilterModel transactionFilterModel);
         Task<bool> UpdateTransaction(UpdateTransactionModel transactionModel);
         Task<bool> DeleteTransaction(int id);
+        Task<List<CategoryModel>> GetIncomeCategory();
     }
 }
