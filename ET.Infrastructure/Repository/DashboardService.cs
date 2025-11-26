@@ -20,7 +20,7 @@ namespace ET.Infrastructure.Repository
             _expenseTrackerContext = expenseTrackerContext;
         }
 
-        public async Task<DashboardModel> GetDashboardData(int userId,int month)
+        public async Task<DashboardModel> GetDashboardData(int userId,int month,string type)
         {
             var dashboard = new DashboardModel();
             dashboard.CategoryExpenses = new List<CategoryExpenseItem>();
@@ -45,6 +45,11 @@ namespace ET.Infrastructure.Repository
                     monthParam.ParameterName = "@Month";
                     monthParam.Value = month;
                     command.Parameters.Add(monthParam);
+
+                    var typeParam = command.CreateParameter();
+                    typeParam.ParameterName = "@Type";
+                    typeParam.Value = type;
+                    command.Parameters.Add(typeParam);
 
                     using (var reader = await command.ExecuteReaderAsync())
                     {

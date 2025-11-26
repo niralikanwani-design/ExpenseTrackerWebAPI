@@ -37,7 +37,7 @@ namespace ET.WebAPI.Controllers
                 var result = await _Itransactions.AddTransaction(transactionModel);
                 return Ok(result);
             }
-            catch(Exception)
+            catch (Exception)
             {
                 return new JsonResult(new JsonResultObj(StatusCodes.Status500InternalServerError, "Error Occured while generating the transaction!"));
             }
@@ -80,5 +80,15 @@ namespace ET.WebAPI.Controllers
                 return new JsonResult(new JsonResultObj(StatusCodes.Status500InternalServerError, "Error Occured while deleting the transaction!"));
             }
         }
+
+        [HttpGet("GetIncomeCategory")]
+        public async Task<IActionResult> GetIncomeCategory()
+        {
+            var result = await _Itransactions.GetIncomeCategory();
+            if (result == null || !result.Any())
+                return BadRequest("No Category found!");
+            return Ok(result);
+        }
+
     }
 }
