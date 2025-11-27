@@ -8,8 +8,10 @@
         public string Type { get; set; } = null!;
         public string? Description { get; set; }
         public string? Title { get; set; }
+        public int UserId { get; set; }
         public DateTime TransactionDate { get; set; }
         public DateTime? CreatedAt { get; set; }
+        public string? CategoryName { get; set; }
     }
 
     public class UpdateTransactionModel
@@ -26,7 +28,8 @@
     {
         public string Title { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
-        public string CategoryId { get; set; } = string.Empty;
+        public string CategoryName { get; set; } = string.Empty;
+        public int Amount { get; set; }
     }
 
     public class TransactionFilterModel

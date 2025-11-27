@@ -26,7 +26,8 @@ namespace ET.Infrastructure.Repository
                     CreatedAt = transactionModel.CreatedAt,
                     Description = transactionModel.Description,
                     Type = transactionModel.Type,
-                    UserId = 1
+                    Title = transactionModel.Title,
+                    UserId = transactionModel.UserId
                 };
 
                 await _dbcontext.AddAsync(transactions);
@@ -37,6 +38,11 @@ namespace ET.Infrastructure.Repository
             {
                 throw;
             }
+        }
+
+        public async Task<int> GetTotalTransactionCount()
+        {
+            return await _dbcontext.Transactions.CountAsync();
         }
 
         public async Task<List<TransactionModel>> GetTransaction(TransactionFilterModel transactionFilterModel)
@@ -67,10 +73,16 @@ namespace ET.Infrastructure.Repository
                 query = query.Where(t => t.Description != null && t.Description.Contains(descFilter));
             }
 
-            if (!string.IsNullOrWhiteSpace(transactionFilterModel.Filters.CategoryId))
+            if (!string.IsNullOrWhiteSpace(transactionFilterModel.Filters.CategoryName))
             {
-                string categoryFilter = transactionFilterModel.Filters.CategoryId;
-                query = query.Where(t => t.CategoryId.ToString().Contains(categoryFilter));
+                string categoryFilter = transactionFilterModel.Filters.CategoryName;
+                query = query.Where(t => t.Category != null && t.Category.Name != null && t.Category.Name.Contains(categoryFilter));
+            }
+
+            if (transactionFilterModel.Filters.Amount > 0)
+            {
+                int amountFilter = transactionFilterModel.Filters.Amount;
+                query = query.Where(t => t.Amount == amountFilter);
             }
 
             int pageNumber = transactionFilterModel.PageNumber <= 0 ? 1 : transactionFilterModel.PageNumber;
@@ -84,8 +96,9 @@ namespace ET.Infrastructure.Repository
                 {
                     "title" => isAscending ? query.OrderBy(t => t.Title) : query.OrderByDescending(t => t.Title),
                     "description" => isAscending ? query.OrderBy(t => t.Description) : query.OrderByDescending(t => t.Description),
-                    "categoryId" => isAscending ? query.OrderBy(t => t.CategoryId) : query.OrderByDescending(t => t.CategoryId),
-                    "date" => isAscending ? query.OrderBy(t => t.TransactionDate) : query.OrderByDescending(t => t.TransactionDate),
+                    "categoryname" => isAscending ? query.OrderBy(t => t.Category.Name) : query.OrderByDescending(t => t.Category.Name),
+                    "transactiondate" => isAscending ? query.OrderBy(t => t.TransactionDate) : query.OrderByDescending(t => t.TransactionDate),
+                    "amount" => isAscending ? query.OrderBy(t => t.Amount) : query.OrderByDescending(t => t.Amount),
                     _ => query.OrderByDescending(t => t.TransactionDate),
                 };
             }
@@ -94,7 +107,7 @@ namespace ET.Infrastructure.Repository
                 query = query.OrderByDescending(t => t.TransactionDate);
             }
 
-            query = query.OrderBy(t => t.TransactionId).Skip((pageNumber - 1) * pageSize).Take(pageSize);
+            query = query.Skip((pageNumber - 1) * pageSize).Take(pageSize);
 
             List<TransactionModel> transactions = await query.Select(t => new TransactionModel
             {
@@ -105,9 +118,27 @@ namespace ET.Infrastructure.Repository
                 CreatedAt = t.CreatedAt,
                 TransactionDate = t.TransactionDate,
                 Type = t.Type,
-                Title = t.Title
+                Title = t.Title,
+                CategoryName = t.Category.Name
             }).AsNoTracking().ToListAsync();
             return transactions;
+        }
+
+        public async Task<TransactionModel?> GetTransactionById(int id)
+        {
+            return await _dbcontext.Transactions.AsNoTracking().Where(t => t.TransactionId == id)
+                .Select(t => new TransactionModel
+                    {
+                        TransactionId = t.TransactionId,
+                        Amount = t.Amount,
+                        CategoryId = t.CategoryId,
+                        Description = t.Description,
+                        CreatedAt = t.CreatedAt,
+                        TransactionDate = t.TransactionDate,
+                        Type = t.Type,
+                        Title = t.Title,
+                        CategoryName = t.Category.Name
+                    }).FirstOrDefaultAsync();
         }
 
         public async Task<bool> UpdateTransaction(UpdateTransactionModel transactionModel)
@@ -148,22 +179,9 @@ namespace ET.Infrastructure.Repository
             }
         }
 
-        public async Task<List<CategoryModel>> GetIncomeCategory()
+        public async Task<List<Category>> GetCategories()
         {
-            try
-            {
-                var category = await _dbcontext.Categories.Where(x => x.Type == "Income").Select(x => new CategoryModel{
-                 CategoryId = x.CategoryId,
-                 CategoryName = x.Name,
-                }).ToListAsync();
-
-                return category;
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
+            return await _dbcontext.Categories.AsNoTracking().ToListAsync();
         }
-
     }
 }
