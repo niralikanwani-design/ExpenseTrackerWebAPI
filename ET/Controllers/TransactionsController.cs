@@ -1,5 +1,6 @@
 ﻿using ET.Domain.DTO;
 using ET.Domain.IRepository;
+using ET.Domain.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ET.WebAPI.Controllers
@@ -8,20 +9,39 @@ namespace ET.WebAPI.Controllers
     [ApiController]
     public class TransactionsController : ControllerBase
     {
-        private readonly ITransactionsService _Itransactions;
+        private readonly ITransactionsService _transactionsService;
 
-        public TransactionsController(ITransactionsService transactions)
+        public TransactionsController(ITransactionsService transactionsService)
         {
-            _Itransactions = transactions;
+            _transactionsService = transactionsService;
         }
 
         [HttpPost("GetTransaction")]
         public async Task<IActionResult> GetTransaction([FromBody] TransactionFilterModel transactionFilterModel)
         {
-            var result = await _Itransactions.GetTransaction(transactionFilterModel);
-            if (result == null || !result.Any())
-                return BadRequest("No transactions found");
+            var result = await _transactionsService.GetTransaction(transactionFilterModel);
+            if (result == null || !result.Any()) return BadRequest("No Data found!");
             return Ok(result);
+        }
+
+        [HttpGet("GetTransactionById")]
+        public async Task<IActionResult> GetTransactionById(int id)
+        {
+            var result = await _transactionsService.GetTransactionById(id);
+            if (result == null) return BadRequest("No Data found!");
+            return Ok(result);
+        }
+
+        [HttpGet("GetTotalTransactionCount")]
+        public async Task<int> GetTotalTransactionCount()
+        {
+            return await _transactionsService.GetTotalTransactionCount();
+        }
+
+        [HttpGet("GetCategories")]
+        public async Task<List<Category>> GetCategories()
+        {
+            return await _transactionsService.GetCategories();
         }
 
         [HttpPost("AddTransaction")]
@@ -34,7 +54,7 @@ namespace ET.WebAPI.Controllers
 
             try
             {
-                var result = await _Itransactions.AddTransaction(transactionModel);
+                var result = await _transactionsService.AddTransaction(transactionModel);
                 return Ok(result);
             }
             catch (Exception)
@@ -53,7 +73,7 @@ namespace ET.WebAPI.Controllers
 
             try
             {
-                var result = await _Itransactions.UpdateTransaction(transactionModel);
+                var result = await _transactionsService.UpdateTransaction(transactionModel);
                 return Ok(result);
             }
             catch (Exception)
@@ -62,7 +82,7 @@ namespace ET.WebAPI.Controllers
             }
         }
 
-        [HttpDelete("DeleteTransaction")]
+        [HttpDelete("DeleteTransaction/{id}")]
         public async Task<IActionResult> DeleteTransaction(int id)
         {
             if (id < 1)
@@ -72,7 +92,7 @@ namespace ET.WebAPI.Controllers
 
             try
             {
-                var result = await _Itransactions.DeleteTransaction(id);
+                var result = await _transactionsService.DeleteTransaction(id);
                 return Ok(result);
             }
             catch (Exception)
@@ -80,15 +100,5 @@ namespace ET.WebAPI.Controllers
                 return new JsonResult(new JsonResultObj(StatusCodes.Status500InternalServerError, "Error Occured while deleting the transaction!"));
             }
         }
-
-        [HttpGet("GetIncomeCategory")]
-        public async Task<IActionResult> GetIncomeCategory()
-        {
-            var result = await _Itransactions.GetIncomeCategory();
-            if (result == null || !result.Any())
-                return BadRequest("No Category found!");
-            return Ok(result);
-        }
-
     }
 }
