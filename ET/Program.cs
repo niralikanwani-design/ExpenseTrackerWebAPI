@@ -1,4 +1,5 @@
 
+using ET.Domain.DTO;
 using ET.Domain.IRepository;
 using ET.Infrastructure.Context;
 using ET.Infrastructure.Repository;
@@ -46,6 +47,7 @@ namespace ET.WebAPI
             builder.Services.AddScoped<IDashboardService, DashboardService>();
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddAuthorization();
+            builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 
             var app = builder.Build();
             if (app.Environment.IsDevelopment())
@@ -62,6 +64,7 @@ namespace ET.WebAPI
             }
 
             app.UseHttpsRedirection();
+            app.UseAuthentication();
 
             app.UseAuthorization();
 
