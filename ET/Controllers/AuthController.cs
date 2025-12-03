@@ -1,10 +1,10 @@
-﻿using ET.Domain.DTO;
-using ET.Domain.IRepository;
+﻿using ET.Application.Contracts;
+using ET.Application.DTOs;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ET.WebAPI.Controllers
-{
-    [Route("api/[controller]")]
+namespace ET.WebAPI.Controllers;
+
+[Route("api/[controller]")]
 [ApiController]
 public class AuthController : ControllerBase
 {
@@ -37,11 +37,10 @@ public class AuthController : ControllerBase
         return !result.Success
             ? Ok(new { Message = result.Message, Token = "", Success = false })
             : (IActionResult)Ok(new
-        {
-            Token = result.Token,
-            Success = true,
-            Message = "Login successful"
-        });
+            {
+                Token = result.Token,
+                Success = true,
+                Message = "Login successful"
+            });
     }
-}
 }

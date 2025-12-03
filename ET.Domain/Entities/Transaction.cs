@@ -1,4 +1,4 @@
-﻿namespace ET.Domain.Models;
+﻿namespace ET.Domain.Entities;
 
 public partial class Transaction
 {

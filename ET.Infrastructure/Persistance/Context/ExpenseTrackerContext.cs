@@ -1,18 +1,20 @@
-﻿using ET.Domain.DTO;
-using ET.Domain.Models;
+﻿using ET.Application.Contracts;
+using ET.Application.DTOs;
+using ET.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace ET.Infrastructure.Context;
+namespace ET.Infrastructure.Persistance.Context;
 
 public partial class ExpenseTrackerContext : DbContext
 {
-    public ExpenseTrackerContext()
-    {
-    }
+    private readonly ICurrentUserService _currentUserService;
+    private readonly int _currentUserId;
 
-    public ExpenseTrackerContext(DbContextOptions<ExpenseTrackerContext> options)
+    public ExpenseTrackerContext(DbContextOptions<ExpenseTrackerContext> options, ICurrentUserService currentUserService)
         : base(options)
     {
+        _currentUserService = currentUserService;
+        _currentUserId = currentUserService.GetCurrentUserId();
     }
 
     public virtual DbSet<Account> Accounts { get; set; }
@@ -82,6 +84,8 @@ public partial class ExpenseTrackerContext : DbContext
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__Transacti__UserI__2E1BDC42");
+
+            entity.HasQueryFilter(x => x.UserId == _currentUserId);
         });
 
         modelBuilder.Entity<User>(entity =>
