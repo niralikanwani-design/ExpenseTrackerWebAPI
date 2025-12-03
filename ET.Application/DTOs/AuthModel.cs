@@ -27,3 +27,15 @@ public class AuthResponse
     public string Message { get; set; }
     public string Token { get; set; }
 }
+
+public class GoogleLoginRequest
+{
+    public string IdToken { get; set; } = string.Empty;
+}
+
+public class GoogleLoginModel
+{
+    public string FullName { get; set; } = null!;
+    public string Email { get; set; } = null!;
+    public string GoogleUserId { get; set; } = null!;
+}

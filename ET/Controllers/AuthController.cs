@@ -43,4 +43,31 @@ public class AuthController : ControllerBase
                 Message = "Login successful"
             });
     }
+
+    [HttpPost("LoginWithGoogle")]
+    public async Task<IActionResult> GoogleLogin([FromBody] GoogleLoginRequest request)
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(request.IdToken))
+                return BadRequest(new { success = false, message = "Google token is required" });
+
+            var result = await _authService.LoginWithGoogleAsync(request.IdToken);
+
+            if (!result.Success)
+                return BadRequest(new { success = false, message = result.Message });
+
+            return Ok(new
+            {
+                success = true,
+                token = result.Token,
+                message = "Login successful"
+            });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { success = false, message = ex.Message });
+        }
+    }
+
 }

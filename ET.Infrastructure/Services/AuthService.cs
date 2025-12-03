@@ -2,9 +2,12 @@
 using ET.Application.DTOs;
 using ET.Domain.Entities;
 using ET.Infrastructure.Persistance.Context;
+using ET.Infrastructure.Repository;
+using Google.Apis.Auth;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -16,11 +19,13 @@ public class AuthService : IAuthService
 {
     private readonly ExpenseTrackerContext _dbcontext;
     private readonly IConfiguration _config;
+    private readonly IOptions<EmailSettings> _emailSettings;
 
-    public AuthService(ExpenseTrackerContext dbcontext, IConfiguration config)
+    public AuthService(ExpenseTrackerContext dbcontext, IConfiguration config, IOptions<EmailSettings> emailSettings)
     {
         _dbcontext = dbcontext;
         _config = config;
+        _emailSettings = emailSettings;
     }
 
     public async Task<AuthResponse> RegisterUser(AuthRegisterModel model)
@@ -120,4 +125,54 @@ public class AuthService : IAuthService
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
+
+    public async Task<(bool Success, string Token, string Message)> LoginWithGoogleAsync(string idToken)
+    {
+        try
+        {
+            var payload = await GoogleJsonWebSignature.ValidateAsync(idToken);
+
+            string email = payload.Email;
+            string fullName = payload.Name;
+
+            var user = await _dbcontext.Users.FirstOrDefaultAsync(u => u.Email == email);
+            var passwordHasher = new PasswordHasher<User>();
+            if (user == null)
+            {
+                var newPassword = Guid.NewGuid().ToString().Substring(0, 8);
+                user = new User
+                {
+                    FullName = fullName,
+                    Email = email,
+                    CreatedAt = DateTime.UtcNow,
+                };
+                user.PasswordHash = passwordHasher.HashPassword(user, newPassword);
+                _dbcontext.Users.Add(user);
+                await _dbcontext.SaveChangesAsync();
+                var emailBody = $@"
+                    <div style='font-family: Arial, sans-serif; padding: 20px;'>
+                        <h2>Welcome to Expenss Tracker!</h2>
+                        <p>Hi <strong>{fullName}</strong>,</p>
+                        <p>Your account was created automatically when you used Google login.</p>
+                        <p>Your generated password:</p>
+                        <h3>{newPassword}</h3>
+                        <p>You can change this password after login.</p>
+                    </div>";
+
+                await SmtpEmailHelper.SendEmailAsync(email: email,
+                     subject: "Welcome to Expenss tracker - Your Password",
+                message: emailBody,
+                     emailSettings: _emailSettings.Value);
+            }
+
+            // Generate JWT Token
+            var token = GenerateJwtToken(user);
+            return (true, token, "Login successful");
+        }
+        catch (Exception ex)
+        {
+            return (false, "", ex.Message);
+        }
+    }
+
 }

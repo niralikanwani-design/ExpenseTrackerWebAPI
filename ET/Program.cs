@@ -1,5 +1,6 @@
 
 using ET.Application.Contracts;
+using ET.Application.DTOs;
 using ET.Infrastructure.Persistance.Context;
 using ET.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -50,6 +51,7 @@ public class Program
         builder.Services.AddScoped<IAuthService, AuthService>();
         
         builder.Services.AddAuthorization();
+        builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 
         var app = builder.Build();
         if (app.Environment.IsDevelopment())
@@ -65,7 +67,8 @@ public class Program
             app.UseSwaggerUI();
         }
 
-        app.UseHttpsRedirection();
+            app.UseHttpsRedirection();
+            app.UseAuthentication();
 
         app.UseAuthorization();
 

@@ -47,6 +47,12 @@ public class TransactionsController : ControllerBase
         return await _transactionsService.GetCategories();
     }
 
+    [HttpGet("GetAccountType")]
+    public async Task<List<Account>> GetAccountType()
+    {
+        return await _transactionsService.GetAccountType();
+    }
+
     [HttpPost("AddTransaction")]
     public async Task<IActionResult> AddTransaction([FromBody] TransactionModel transactionModel)
     {

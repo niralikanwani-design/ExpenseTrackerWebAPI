@@ -12,4 +12,5 @@ public interface ITransactionService
     Task<bool> UpdateTransaction(UpdateTransactionModel transactionModel);
     Task<bool> DeleteTransaction(int id);
     Task<List<Category>> GetCategories();
+    Task<List<Account>> GetAccountType();
 }

@@ -12,6 +12,7 @@ public class TransactionModel
     public DateTime TransactionDate { get; set; }
     public DateTime? CreatedAt { get; set; }
     public string? CategoryName { get; set; }
+    public int AccountTypeId { get; set; }
 }
 
 public class UpdateTransactionModel
@@ -21,6 +22,7 @@ public class UpdateTransactionModel
     public string Type { get; set; } = null!;
     public string? Description { get; set; }
     public string? Title { get; set; }
+    public int? AccountId { get; set; }
     public DateTime TransactionDate { get; set; }
 }
 
