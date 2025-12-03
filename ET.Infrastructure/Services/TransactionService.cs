@@ -27,7 +27,8 @@ public class TransactionService : ITransactionService
                 Description = transactionModel.Description,
                 Type = transactionModel.Type,
                 Title = transactionModel.Title,
-                UserId = transactionModel.UserId
+                UserId = transactionModel.UserId,
+                AccountId = transactionModel.AccountTypeId
             };
 
             await _dbcontext.AddAsync(transactions);
@@ -116,6 +117,7 @@ public class TransactionService : ITransactionService
             CategoryId = t.CategoryId,
             Description = t.Description,
             CreatedAt = t.CreatedAt,
+            AccountTypeId = t.AccountId.HasValue ? (int)t.AccountId : 0,
             TransactionDate = t.TransactionDate,
             Type = t.Type,
             Title = t.Title,
@@ -133,6 +135,7 @@ public class TransactionService : ITransactionService
                 Amount = t.Amount,
                 CategoryId = t.CategoryId,
                 Description = t.Description,
+                AccountTypeId = (int)t.AccountId,
                 CreatedAt = t.CreatedAt,
                 TransactionDate = t.TransactionDate,
                 Type = t.Type,
@@ -152,6 +155,7 @@ public class TransactionService : ITransactionService
             transaction.TransactionDate = transactionModel.TransactionDate;
             transaction.Description = transactionModel.Description;
             transaction.Title = transactionModel.Title;
+            transaction.AccountId = transactionModel.AccountId;
             _dbcontext.Update(transaction);
             await _dbcontext.SaveChangesAsync();
             return true;
@@ -182,5 +186,10 @@ public class TransactionService : ITransactionService
     public async Task<List<Category>> GetCategories()
     {
         return await _dbcontext.Categories.AsNoTracking().ToListAsync();
+    }
+
+    public async Task<List<Account>> GetAccountType()
+    {
+        return await _dbcontext.Accounts.AsNoTracking().ToListAsync();
     }
 }

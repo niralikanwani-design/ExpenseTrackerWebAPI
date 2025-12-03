@@ -31,23 +31,8 @@ public partial class ExpenseTrackerContext : DbContext
         {
             entity.HasKey(e => e.AccountId).HasName("PK__Accounts__349DA5A65B222AE8");
 
-            entity.Property(e => e.AccountName).HasMaxLength(100);
-            entity.Property(e => e.AccountType).HasMaxLength(50);
-            entity.Property(e => e.Balance)
-                .HasDefaultValueSql("((0))")
-                .HasColumnType("decimal(12, 2)");
-            entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime");
-            entity.Property(e => e.Currency)
-                .HasMaxLength(10)
-                .HasDefaultValueSql("('INR')");
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.IsActive).HasDefaultValueSql("((1))");
-
-            entity.HasOne(d => d.User).WithMany(p => p.Accounts)
-                .HasForeignKey(d => d.UserId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Accounts__UserId__35BCFE0A");
         });
 
         modelBuilder.Entity<Category>(entity =>
@@ -56,11 +41,6 @@ public partial class ExpenseTrackerContext : DbContext
 
             entity.Property(e => e.Name).HasMaxLength(50);
             entity.Property(e => e.Type).HasMaxLength(20);
-
-            entity.HasOne(d => d.User).WithMany(p => p.Categories)
-                .HasForeignKey(d => d.UserId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Categorie__UserI__29572725");
         });
 
         modelBuilder.Entity<Transaction>(entity =>
@@ -84,6 +64,8 @@ public partial class ExpenseTrackerContext : DbContext
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__Transacti__UserI__2E1BDC42");
+
+            entity.HasOne(d => d.Account).WithMany(p => p.Transactions).HasConstraintName("FK_Transactions_Accounts");
 
             entity.HasQueryFilter(x => x.UserId == _currentUserId);
         });
