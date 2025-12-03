@@ -7,12 +7,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ET.Domain\ET.Domain.csproj" />
+    <Compile Remove="Helper\**" />
+    <Compile Remove="Service\**" />
+    <EmbeddedResource Remove="Helper\**" />
+    <EmbeddedResource Remove="Service\**" />
+    <None Remove="Helper\**" />
+    <None Remove="Service\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Helper\" />
-    <Folder Include="Service\" />
+    <ProjectReference Include="..\ET.Domain\ET.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>

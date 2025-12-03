@@ -1,8 +1,6 @@
-﻿using ET.Domain.IRepository;
-using System;
-using System.Net.Mail;
+﻿using ET.Application.DTOs;
 using System.Net;
-using ET.Domain.DTO;
+using System.Net.Mail;
 
 namespace ET.Infrastructure.Repository
 {

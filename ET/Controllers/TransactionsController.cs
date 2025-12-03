@@ -1,104 +1,106 @@
-﻿using ET.Domain.DTO;
-using ET.Domain.IRepository;
-using ET.Domain.Models;
+﻿using ET.Application.Contracts;
+using ET.Application.DTOs;
+using ET.Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ET.WebAPI.Controllers
+namespace ET.WebAPI.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+[Authorize]
+public class TransactionsController : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class TransactionsController : ControllerBase
+    private readonly ITransactionService _transactionsService;
+
+    public TransactionsController(ITransactionService transactionsService)
     {
-        private readonly ITransactionsService _transactionsService;
+        _transactionsService = transactionsService;
+    }
 
-        public TransactionsController(ITransactionsService transactionsService)
+    [HttpPost("GetTransaction")]
+    public async Task<IActionResult> GetTransaction([FromBody] TransactionFilterModel transactionFilterModel)
+    {
+        var result = await _transactionsService.GetTransaction(transactionFilterModel);
+        if (result == null || !result.Any()) return BadRequest("No Data found!");
+        return Ok(result);
+    }
+
+    [HttpGet("GetTransactionById")]
+    public async Task<IActionResult> GetTransactionById(int id)
+    {
+        var result = await _transactionsService.GetTransactionById(id);
+        if (result == null) return BadRequest("No Data found!");
+        return Ok(result);
+    }
+
+    [HttpGet("GetTotalTransactionCount")]
+    public async Task<int> GetTotalTransactionCount()
+    {
+        return await _transactionsService.GetTotalTransactionCount();
+    }
+
+    [HttpGet("GetCategories")]
+    [AllowAnonymous]
+    public async Task<List<Category>> GetCategories()
+    {
+        return await _transactionsService.GetCategories();
+    }
+
+    [HttpPost("AddTransaction")]
+    public async Task<IActionResult> AddTransaction([FromBody] TransactionModel transactionModel)
+    {
+        if (!ModelState.IsValid)
         {
-            _transactionsService = transactionsService;
+            return BadRequest(new JsonResultObj(400, "Invalid model!"));
         }
 
-        [HttpPost("GetTransaction")]
-        public async Task<IActionResult> GetTransaction([FromBody] TransactionFilterModel transactionFilterModel)
+        try
         {
-            var result = await _transactionsService.GetTransaction(transactionFilterModel);
-            if (result == null || !result.Any()) return BadRequest("No Data found!");
+            var result = await _transactionsService.AddTransaction(transactionModel);
             return Ok(result);
         }
-
-        [HttpGet("GetTransactionById")]
-        public async Task<IActionResult> GetTransactionById(int id)
+        catch (Exception)
         {
-            var result = await _transactionsService.GetTransactionById(id);
-            if (result == null) return BadRequest("No Data found!");
+            return new JsonResult(new JsonResultObj(StatusCodes.Status500InternalServerError, "Error Occured while generating the transaction!"));
+        }
+    }
+
+    [HttpPut("UpdateTransaction")]
+    public async Task<IActionResult> UpdateTransaction(UpdateTransactionModel transactionModel)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(new JsonResultObj(400, "Invalid model!"));
+        }
+
+        try
+        {
+            var result = await _transactionsService.UpdateTransaction(transactionModel);
             return Ok(result);
         }
-
-        [HttpGet("GetTotalTransactionCount")]
-        public async Task<int> GetTotalTransactionCount()
+        catch (Exception)
         {
-            return await _transactionsService.GetTotalTransactionCount();
+            return new JsonResult(new JsonResultObj(StatusCodes.Status500InternalServerError, "Error Occured while updating the transaction!"));
+        }
+    }
+
+    [HttpDelete("DeleteTransaction/{id}")]
+    public async Task<IActionResult> DeleteTransaction(int id)
+    {
+        if (id < 1)
+        {
+            return BadRequest(new JsonResultObj(400, "Invalid model!"));
         }
 
-        [HttpGet("GetCategories")]
-        public async Task<List<Category>> GetCategories()
+        try
         {
-            return await _transactionsService.GetCategories();
+            var result = await _transactionsService.DeleteTransaction(id);
+            return Ok(result);
         }
-
-        [HttpPost("AddTransaction")]
-        public async Task<IActionResult> AddTransaction([FromBody] TransactionModel transactionModel)
+        catch (Exception)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(new JsonResultObj(400, "Invalid model!"));
-            }
-
-            try
-            {
-                var result = await _transactionsService.AddTransaction(transactionModel);
-                return Ok(result);
-            }
-            catch (Exception)
-            {
-                return new JsonResult(new JsonResultObj(StatusCodes.Status500InternalServerError, "Error Occured while generating the transaction!"));
-            }
-        }
-
-        [HttpPut("UpdateTransaction")]
-        public async Task<IActionResult> UpdateTransaction(UpdateTransactionModel transactionModel)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(new JsonResultObj(400, "Invalid model!"));
-            }
-
-            try
-            {
-                var result = await _transactionsService.UpdateTransaction(transactionModel);
-                return Ok(result);
-            }
-            catch (Exception)
-            {
-                return new JsonResult(new JsonResultObj(StatusCodes.Status500InternalServerError, "Error Occured while updating the transaction!"));
-            }
-        }
-
-        [HttpDelete("DeleteTransaction/{id}")]
-        public async Task<IActionResult> DeleteTransaction(int id)
-        {
-            if (id < 1)
-            {
-                return BadRequest(new JsonResultObj(400, "Invalid model!"));
-            }
-
-            try
-            {
-                var result = await _transactionsService.DeleteTransaction(id);
-                return Ok(result);
-            }
-            catch (Exception)
-            {
-                return new JsonResult(new JsonResultObj(StatusCodes.Status500InternalServerError, "Error Occured while deleting the transaction!"));
-            }
+            return new JsonResult(new JsonResultObj(StatusCodes.Status500InternalServerError, "Error Occured while deleting the transaction!"));
         }
     }
 }

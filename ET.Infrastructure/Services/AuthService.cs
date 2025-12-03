@@ -1,7 +1,7 @@
-﻿using ET.Domain.DTO;
-using ET.Domain.IRepository;
-using ET.Domain.Models;
-using ET.Infrastructure.Context;
+﻿using ET.Application.Contracts;
+using ET.Application.DTOs;
+using ET.Domain.Entities;
+using ET.Infrastructure.Persistance.Context;
 using ET.Infrastructure.Repository;
 using Google.Apis.Auth;
 using Microsoft.AspNetCore.Identity;
@@ -12,6 +12,8 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+
+namespace ET.Infrastructure.Services;
 
 public class AuthService : IAuthService
 {
@@ -76,7 +78,7 @@ public class AuthService : IAuthService
 
         var user = await _dbcontext.Users
             .FirstOrDefaultAsync(u => u.Email == model.Email);
-        if(user == null)
+        if (user == null)
             return new AuthResponse { Success = false, Message = "Invalid email or password" };
 
         var passwordHasher = new PasswordHasher<User>();
@@ -117,7 +119,7 @@ public class AuthService : IAuthService
             audience: _config["Jwt:Audience"],
             claims: claims,
             expires: DateTime.UtcNow.AddMinutes(
-                Convert.ToDouble(_config["Jwt:ExpiryMinutes"])
+                Convert.ToDouble(_config["Jwt:AccessTokenExpiryMinutes"])
             ),
             signingCredentials: credentials);
 
