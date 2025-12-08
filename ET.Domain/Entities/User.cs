@@ -24,6 +24,12 @@ public partial class User
     [StringLength(20)]
     public string Role { get; set; } = null!;
 
+    [Column(TypeName = "decimal(18, 2)")]
+    public decimal? TotalBalance { get; set; }
+
+    [Column(TypeName = "decimal(18, 2)")]
+    public decimal? MaxLimit { get; set; }
+
     [InverseProperty("User")]
     public virtual ICollection<Category> Categories { get; set; } = new List<Category>();
 

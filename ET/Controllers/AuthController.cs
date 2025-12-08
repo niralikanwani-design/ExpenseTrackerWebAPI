@@ -70,4 +70,16 @@ public class AuthController : ControllerBase
         }
     }
 
+    [HttpPost("AddLimit")]
+    public async Task<IActionResult> AddLimit([FromBody] LimitModel model)
+    {
+        var result = await _authService.AddLimit(model);
+
+        if (!result)
+            return BadRequest("User not found or update failed");
+
+        return Ok("Limit updated successfully");
+    }
+
+
 }

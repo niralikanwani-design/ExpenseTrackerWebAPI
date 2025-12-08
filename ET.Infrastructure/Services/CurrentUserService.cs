@@ -1,5 +1,6 @@
 ﻿using ET.Application.Contracts;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace ET.Infrastructure.Services;
@@ -34,7 +35,7 @@ public class CurrentUserService : ICurrentUserService
         return 0;
     }
 
-    public string GetCurrentUserRole()
+    public async Task<string> GetCurrentUserRole()
     {
         if (CurrentUser.Identity?.IsAuthenticated ?? false)
         {
@@ -43,4 +44,5 @@ public class CurrentUserService : ICurrentUserService
 
         return string.Empty;
     }
+
 }

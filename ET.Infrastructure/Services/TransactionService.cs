@@ -3,6 +3,7 @@ using ET.Application.DTOs;
 using ET.Domain.Entities;
 using ET.Infrastructure.Persistance.Context;
 using Microsoft.EntityFrameworkCore;
+using System.Text;
 
 namespace ET.Infrastructure.Services;
 
@@ -192,4 +193,28 @@ public class TransactionService : ITransactionService
     {
         return await _dbcontext.Accounts.AsNoTracking().ToListAsync();
     }
+
+    public async Task<byte[]> ExportTransactionsToCsv(TransactionFilterModel filter)
+    {
+        filter.PageNumber = 1;
+        filter.PageSize = int.MaxValue;
+
+        var transactions = await GetTransaction(filter);
+
+        if (transactions == null || transactions.Count == 0)
+            return Array.Empty<byte>();
+
+        var csv = new StringBuilder();
+        csv.AppendLine("Title,Description,Category,Date,Type,Amount");
+
+        foreach (var t in transactions)
+        {
+            csv.AppendLine(
+                $"{t.Title},{t.Description},{t.CategoryName},{t.TransactionDate:yyyy-MM-dd},{t.Type},{t.Amount}"
+            );
+        }
+
+        return Encoding.UTF8.GetBytes(csv.ToString());
+    }
+
 }

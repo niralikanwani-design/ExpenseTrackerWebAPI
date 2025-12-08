@@ -10,11 +10,14 @@ public class DashboardModel
 public class DashboardItem
 {
     public decimal TotalExpenses { get; set; }
+    public decimal TotalIncome { get; set; }
     public int NumberofExpenses { get; set; }
     public decimal AverageExpense { get; set; }
     public int ExpenseCategoriesUsed { get; set; }
     public decimal Last30DaysTotal { get; set; }
     public decimal Last30DaysAverage { get; set; }
+    public decimal? TotalBalance { get; set; }
+    public decimal? MaxLimit { get; set; }
 }
 
 public class CategoryExpenseItem

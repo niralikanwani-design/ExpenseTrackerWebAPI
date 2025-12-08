@@ -4,4 +4,5 @@ public interface ICurrentUserService
 {
     string GetCurrentUserName();
     int GetCurrentUserId();
+    Task<string> GetCurrentUserRole();
 }

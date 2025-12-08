@@ -1,6 +1,7 @@
 ﻿using ET.Application.Contracts;
 using ET.Application.DTOs;
 using ET.Domain.Entities;
+using ET.Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -22,7 +23,7 @@ public class TransactionsController : ControllerBase
     public async Task<IActionResult> GetTransaction([FromBody] TransactionFilterModel transactionFilterModel)
     {
         var result = await _transactionsService.GetTransaction(transactionFilterModel);
-        if (result == null || !result.Any()) return BadRequest("No Data found!");
+        if (result == null || !result.Any()) return Ok(null) ;
         return Ok(result);
     }
 
@@ -109,4 +110,20 @@ public class TransactionsController : ControllerBase
             return new JsonResult(new JsonResultObj(StatusCodes.Status500InternalServerError, "Error Occured while deleting the transaction!"));
         }
     }
+
+    [HttpPost("ExportCsv")]
+    public async Task<IActionResult> ExportCsv([FromBody] TransactionFilterModel filterModel)
+    {
+        var csvData = await _transactionsService.ExportTransactionsToCsv(filterModel);
+
+        if (csvData == null || csvData.Length == 0)
+            return BadRequest("No data available");
+
+        return File(
+            csvData,
+            "text/csv",
+            $"Transactions_{DateTime.Now:yyyyMMddHHmmss}.csv"
+        );
+    }
+
 }

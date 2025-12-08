@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using System.Data;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -20,12 +21,14 @@ public class AuthService : IAuthService
     private readonly ExpenseTrackerContext _dbcontext;
     private readonly IConfiguration _config;
     private readonly IOptions<EmailSettings> _emailSettings;
+    private readonly ICurrentUserService _currentUserService;
 
-    public AuthService(ExpenseTrackerContext dbcontext, IConfiguration config, IOptions<EmailSettings> emailSettings)
+    public AuthService(ExpenseTrackerContext dbcontext, IConfiguration config, IOptions<EmailSettings> emailSettings, ICurrentUserService currentUserService)
     {
         _dbcontext = dbcontext;
         _config = config;
         _emailSettings = emailSettings;
+        _currentUserService = currentUserService;
     }
 
     public async Task<AuthResponse> RegisterUser(AuthRegisterModel model)
@@ -55,7 +58,7 @@ public class AuthService : IAuthService
 
         user.PasswordHash = passwordHasher.HashPassword(user, model.Password);
 
-        string token = GenerateJwtToken(user);
+        string token = await GenerateJwtToken(user);
 
         await _dbcontext.Users.AddAsync(user);
         await _dbcontext.SaveChangesAsync();
@@ -88,7 +91,7 @@ public class AuthService : IAuthService
         if (result == PasswordVerificationResult.Failed)
             return new AuthResponse { Success = false, Message = "Invalid email or password" };
 
-        string token = GenerateJwtToken(user);
+        string token = await GenerateJwtToken(user);
 
         return new AuthResponse
         {
@@ -98,16 +101,19 @@ public class AuthService : IAuthService
         };
     }
 
-    private string GenerateJwtToken(User user)
+    private async Task<string> GenerateJwtToken(User user)
     {
         var key = Encoding.UTF8.GetBytes(_config["Jwt:Key"]);
+
+        var role = await GetUserRole(user.UserId);
 
         var claims = new[]
         {
             new Claim("UserId", user.UserId.ToString()),
             new Claim("Email", user.Email),
             new Claim("FullName", user.FullName),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new Claim(ClaimTypes.Role, role)
         };
 
         var credentials = new SigningCredentials(
@@ -165,13 +171,45 @@ public class AuthService : IAuthService
                      emailSettings: _emailSettings.Value);
             }
 
-            // Generate JWT Token
-            var token = GenerateJwtToken(user);
+            var token = await GenerateJwtToken(user);
             return (true, token, "Login successful");
         }
         catch (Exception ex)
         {
             return (false, "", ex.Message);
+        }
+    }
+
+    public async Task<string> GetUserRole(int userId)
+    {
+        return await _dbcontext.Users
+            .Where(u => u.UserId == userId)
+            .Select(u => u.Role)
+            .FirstOrDefaultAsync()
+            ?? "User";
+    }
+
+    public async Task<bool> AddLimit(LimitModel limitModel)
+    {
+        try
+        {
+            var user = await _dbcontext.Users
+                                     .FirstOrDefaultAsync(x => x.UserId == limitModel.UserId);
+
+            if (user == null)
+                return false; // user not found
+
+            // Update fields
+            user.TotalBalance = limitModel.TotalBalance;
+            user.MaxLimit = limitModel.MaxLimit;
+
+            // Save changes
+            await _dbcontext.SaveChangesAsync();
+            return true;
+        }
+        catch (Exception)
+        {
+            return false;
         }
     }
 

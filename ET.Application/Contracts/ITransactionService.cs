@@ -13,4 +13,5 @@ public interface ITransactionService
     Task<bool> DeleteTransaction(int id);
     Task<List<Category>> GetCategories();
     Task<List<Account>> GetAccountType();
+    Task<byte[]> ExportTransactionsToCsv(TransactionFilterModel filter);
 }

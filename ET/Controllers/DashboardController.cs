@@ -1,4 +1,5 @@
 ﻿using ET.Application.Contracts;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ET.WebAPI.Controllers;
@@ -13,6 +14,7 @@ public class DashboardController : ControllerBase
         _service = service;
     }
 
+    //[Authorize(Roles = "Admin")]
     [HttpGet("GetDashboardData/{userId}/{month}/{type}")]
     public async Task<IActionResult> GetDashboardData(int userId, int month, string type)
     {

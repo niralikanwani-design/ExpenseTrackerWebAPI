@@ -54,10 +54,33 @@ public class DashboardService : IDashboardService
                     {
                         dashboard.Summary = new DashboardItem
                         {
-                            TotalExpenses = reader.GetDecimal(reader.GetOrdinal("TotalExpenses")),
-                            NumberofExpenses = reader.GetInt32(reader.GetOrdinal("NumberofExpenses")),
-                            AverageExpense = reader.GetDecimal(reader.GetOrdinal("AverageExpense")),
-                            ExpenseCategoriesUsed = reader.GetInt32(reader.GetOrdinal("ExpenseCategoriesUsed")),
+                            TotalExpenses = reader.IsDBNull(reader.GetOrdinal("TotalExpenses"))
+                       ? 0
+                       : reader.GetDecimal(reader.GetOrdinal("TotalExpenses")),
+
+                            NumberofExpenses = reader.IsDBNull(reader.GetOrdinal("NumberofExpenses"))
+                       ? 0
+                       : reader.GetInt32(reader.GetOrdinal("NumberofExpenses")),
+
+                            AverageExpense = reader.IsDBNull(reader.GetOrdinal("AverageExpense"))
+                       ? 0
+                       : reader.GetDecimal(reader.GetOrdinal("AverageExpense")),
+
+                            ExpenseCategoriesUsed = reader.IsDBNull(reader.GetOrdinal("ExpenseCategoriesUsed"))
+                       ? 0
+                       : reader.GetInt32(reader.GetOrdinal("ExpenseCategoriesUsed")),
+
+                            TotalIncome = reader.IsDBNull(reader.GetOrdinal("TotalIncome"))
+                       ? 0
+                       : reader.GetDecimal(reader.GetOrdinal("TotalIncome")),
+
+                            TotalBalance = reader.IsDBNull(reader.GetOrdinal("TotalBalance"))
+                       ? (decimal?)null
+                       : reader.GetDecimal(reader.GetOrdinal("TotalBalance")),
+
+                            MaxLimit = reader.IsDBNull(reader.GetOrdinal("MaxLimit"))
+                       ? (decimal?)null
+                       : reader.GetDecimal(reader.GetOrdinal("MaxLimit"))
                         };
                     }
 

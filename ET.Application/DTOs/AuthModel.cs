@@ -39,3 +39,10 @@ public class GoogleLoginModel
     public string Email { get; set; } = null!;
     public string GoogleUserId { get; set; } = null!;
 }
+
+public class LimitModel
+{
+    public int UserId { get; set; }
+    public int TotalBalance { get; set; }
+    public int MaxLimit { get; set; }
+}
