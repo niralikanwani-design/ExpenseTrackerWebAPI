@@ -46,3 +46,17 @@ public class LimitModel
     public int TotalBalance { get; set; }
     public int MaxLimit { get; set; }
 }
+
+public class EditUserData
+{
+    public int UserId { get; set; }
+    public string FullName { get; set; }
+    public string Email { get; set; }
+    public int TotalBalance { get; set; }
+    public int MaxLimit { get; set; }
+}
+
+public class ChangePasswordRequest
+{
+    public string Email { get; set; }
+}

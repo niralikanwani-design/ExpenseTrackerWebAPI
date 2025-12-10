@@ -81,5 +81,50 @@ public class AuthController : ControllerBase
         return Ok("Limit updated successfully");
     }
 
+    [HttpGet("GetUserData")]
+    public async Task<IActionResult> GetUserData(int userid)
+    {
+        var result = await _authService.GetUserData(userid);
+
+        if (result == null)
+            return BadRequest("User not found");
+
+        return Ok(result);
+    }
+
+    [HttpPost("EditUserData")]
+    public async Task<IActionResult> EditUserData(EditUserData editUserData)
+    {
+        var result = await _authService.EditUserData(editUserData);
+        return Ok(result);
+    }
+
+    [HttpPost("ChangePassword")]
+    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
+    {
+        var result = await _authService.ChangePassword(request.Email);
+
+        if (result)
+            return Ok("Email sent successfully");
+
+        return BadRequest("Something went wrong");
+    }
+
+    [HttpPost("SetPassword")]
+    public async Task<IActionResult> SetPassword([FromBody] Dictionary<string, string> data)
+    {
+        if (!data.ContainsKey("email") || !data.ContainsKey("password"))
+            return BadRequest("Email and password required.");
+
+        string email = data["email"];
+        string password = data["password"];
+
+        var result = await _authService.SetPassword(email, password);
+
+        if (result == "")
+            return BadRequest("Failed to update password.");
+
+        return Ok(new { message = "Password changed successfully" });
+    }
 
 }

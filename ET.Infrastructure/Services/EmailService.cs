@@ -1,36 +1,36 @@
 ﻿using ET.Application.DTOs;
 using System.Net;
 using System.Net.Mail;
+using System.Net.Security;
 
 namespace ET.Infrastructure.Repository
 {
     public static class SmtpEmailHelper
     {
-        public async static Task SendEmailAsync(string email, string subject, string message, EmailSettings emailSettings)
+        public static async Task SendEmailAsync(string email, string subject, string message, EmailSettings emailSettings)
         {
             try
             {
                 using (var client = new SmtpClient(emailSettings.SmtpHost, emailSettings.SmtpPort))
                 {
-                    client.Credentials = new NetworkCredential(
-                        emailSettings.SmtpUser,
-                        emailSettings.SmtpPass
-                    );
+                    client.EnableSsl = emailSettings.EnableSsl;
+                    client.UseDefaultCredentials = false;
+                    client.Credentials = new NetworkCredential(emailSettings.SmtpUser, emailSettings.SmtpPass);
+                    client.DeliveryMethod = SmtpDeliveryMethod.Network;
 
-                    ServicePointManager.ServerCertificateValidationCallback = delegate (object s,
-                        System.Security.Cryptography.X509Certificates.X509Certificate certificate,
-                        System.Security.Cryptography.X509Certificates.X509Chain chain,
-                        System.Net.Security.SslPolicyErrors sslPolicyErrors)
-                            {
-                                return true;
-                            };
+                    // ✔ Proper HELO domain handling (No reflection)
+                    client.TargetName = "STARTTLS/" + emailSettings.SmtpHost;
+
+                    // ✔ Accept SSL certificate if required
+                    ServicePointManager.ServerCertificateValidationCallback =
+                        new RemoteCertificateValidationCallback((s, cert, chain, errors) => true);
 
                     var mailMessage = new MailMessage
                     {
-                        From = new MailAddress( emailSettings.From),
+                        From = new MailAddress(emailSettings.From, "Expense Tracker"),
                         Subject = subject,
                         Body = message,
-                        IsBodyHtml = true,
+                        IsBodyHtml = true
                     };
 
                     mailMessage.To.Add(email);

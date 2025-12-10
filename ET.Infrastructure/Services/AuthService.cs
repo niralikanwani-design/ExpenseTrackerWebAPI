@@ -213,4 +213,156 @@ public class AuthService : IAuthService
         }
     }
 
+    public async Task<User> GetUserData(int userId)
+    {
+        try
+        {
+            var user = await _dbcontext.Users.FirstOrDefaultAsync(x => x.UserId == userId);
+
+            if (user == null)
+            {
+                return null;
+            }
+
+            return user;
+
+        }
+        catch (Exception ex)
+        {
+            throw;
+        }
+    }
+
+    public async Task<string> EditUserData(EditUserData editUserData)
+    {
+        try
+        {
+            var user = await _dbcontext.Users.FirstOrDefaultAsync(x => x.UserId == editUserData.UserId);
+
+            if (user == null)
+                return "User not found";
+
+            if (string.IsNullOrWhiteSpace(editUserData.FullName))
+                return "Full Name cannot be empty";
+
+            if (string.IsNullOrWhiteSpace(editUserData.Email))
+                return "Email cannot be empty";
+
+            user.FullName = editUserData.FullName;
+            user.TotalBalance = editUserData.TotalBalance;
+            user.MaxLimit = editUserData.MaxLimit;
+            await _dbcontext.SaveChangesAsync();
+            return "Your profile update successfully!!";
+
+        }
+        catch (Exception ex)
+        {
+            return $"Error: {ex.Message}";
+        }
+    }
+
+    public async Task<bool> ChangePassword(string email)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(email))
+                throw new Exception("Email cannot be empty.");
+
+            var user = await _dbcontext.Users.FirstOrDefaultAsync(x => x.Email == email);
+            if (user == null)
+                throw new Exception("User not found.");
+
+            string name = user.FullName ?? "User";
+
+            string resetLink = $"http://localhost:5173/ChangePassword?email={email}";
+
+            string emailBody = $@"
+        <table width='100%' cellspacing='0' cellpadding='0' 
+               style='font-family: Arial, sans-serif; background:#f7f7f7; padding: 30px 0;'>
+            <tr>
+                <td align='center'>
+                    <table width='600' cellspacing='0' cellpadding='0' 
+                           style='background:#ffffff; border-radius:8px; padding:30px; box-shadow:0 4px 10px rgba(0,0,0,0.1);'>
+                        
+                        <tr>
+                            <td style='text-align:center; padding-bottom:20px;'>
+                                <h2 style='color:#333; margin:0;'>Expense Tracker</h2>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>
+                                <p style='font-size:16px; color:#333;'>Hello <strong>{name}</strong>,</p>
+                                <p style='font-size:15px; color:#555; line-height:1.6;'>
+                                    You requested to reset your password.  
+                                    Click the button below to set a new password.
+                                </p>
+
+                                <div style='text-align:center; margin:25px 0;'>
+                                    <a href='{resetLink}'
+                                       style='background:#0066ff; color:#ffffff; padding:12px 25px;
+                                              font-size:16px; text-decoration:none; border-radius:6px;
+                                              display:inline-block;'>
+                                        Reset Password
+                                    </a>
+                                </div>
+
+                                <p style='font-size:14px; color:#777; line-height:1.6;'>
+                                    If you did not request this, you can safely ignore this email.
+                                </p>
+
+                                <p style='font-size:14px; color:#999; padding-top:20px;'>
+                                    Thank you,<br>
+                                    <strong>Expense Tracker Team</strong>
+                                </p>
+                            </td>
+                        </tr>
+
+                    </table>
+                </td>
+            </tr>
+        </table>";
+
+            emailBody = emailBody;
+
+            await SmtpEmailHelper.SendEmailAsync(
+                email: "yashvariya20@gmail.com",
+                subject: "Expense Tracker - Reset Your Password",
+                message: emailBody,
+                emailSettings: _emailSettings.Value
+            );
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            throw new Exception("ChangePassword failed: " + ex.Message);
+        }
+    }
+
+    public async Task<string> SetPassword(string email, string password)
+    {
+        try
+        {
+            var user = await _dbcontext.Users.FirstOrDefaultAsync(x => x.Email == email);
+
+            if (user == null)
+                return "User not found";
+
+            var passwordHasher = new PasswordHasher<User>();
+
+            // Hash new password
+            user.PasswordHash = passwordHasher.HashPassword(user, password);
+
+            _dbcontext.Users.Update(user);
+            await _dbcontext.SaveChangesAsync();
+
+            return "Password updated successfully";
+        }
+        catch (Exception ex)
+        {
+            return ex.Message;
+        }
+    }
+
 }
