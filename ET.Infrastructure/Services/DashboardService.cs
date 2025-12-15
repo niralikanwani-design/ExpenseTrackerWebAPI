@@ -35,7 +35,7 @@ public class DashboardService : IDashboardService
 
                 var userParam = command.CreateParameter();
                 userParam.ParameterName = "@UserId";
-                userParam.Value = _currentUserService.GetCurrentUserId();
+                userParam.Value = userId;
                 command.Parameters.Add(userParam);
 
                 var monthParam = command.CreateParameter();
@@ -107,7 +107,7 @@ public class DashboardService : IDashboardService
                             Month = reader.GetString(reader.GetOrdinal("Month")),
                             TotalAmount = reader.GetDecimal(reader.GetOrdinal("TotalAmount"))
                         });
-                    }
+                        }
 
                 }
             }
