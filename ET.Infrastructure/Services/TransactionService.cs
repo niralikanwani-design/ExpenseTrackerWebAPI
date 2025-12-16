@@ -50,7 +50,7 @@ public class TransactionService : ITransactionService
     public async Task<List<TransactionModel>> GetTransaction(TransactionFilterModel transactionFilterModel)
     {
         DateTime startDate;
-        DateTime endDate;
+        DateTime endDate; 
 
         var query = _dbcontext.Transactions.AsQueryable();
 
